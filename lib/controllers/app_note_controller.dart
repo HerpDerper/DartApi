@@ -218,6 +218,7 @@ class AppNoteController extends ResourceController {
           notesQuery.where((note) => note.status).equalTo(filter);
           break;
         default:
+          notesQuery.where((note) => note.status).notEqualTo("deleted");
           break;
       }
       if (limit != null && limit > 0) {
