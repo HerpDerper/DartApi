@@ -172,7 +172,6 @@ class AppNoteController extends ResourceController {
         [
           "user",
           "id",
-          "status",
         ],
       );
       return AppResponse.ok(
@@ -234,7 +233,6 @@ class AppNoteController extends ResourceController {
           [
             "user",
             "id",
-            "status",
           ],
         );
         notesJson.add(note.backing.contents);
