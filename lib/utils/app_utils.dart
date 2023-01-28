@@ -8,7 +8,10 @@ abstract class AppUtils {
   static int getIdFromToken(String token) {
     try {
       final key = Platform.environment["SECRET_KEY"] ?? 'SECRET_KEY';
-      final jwtCLaim = verifyJwtHS256Signature(token, key);
+      final jwtCLaim = verifyJwtHS256Signature(
+        token,
+        key,
+      );
       return int.parse(
         jwtCLaim["id"].toString(),
       );
