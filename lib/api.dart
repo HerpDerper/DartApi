@@ -13,27 +13,16 @@ class AppService extends ApplicationChannel {
   @override
   Future prepare() {
     final persistentStore = _initDatabase();
-    managedContext = ManagedContext(
-      ManagedDataModel.fromCurrentMirrorSystem(),
-      persistentStore,
-    );
+    managedContext = ManagedContext(ManagedDataModel.fromCurrentMirrorSystem(), persistentStore);
     return super.prepare();
   }
 
   @override
   Controller get entryPoint => Router()
-    ..route('token/[:refresh]').link(
-      () => AppAuthController(managedContext),
-    )
-    ..route('user').link(AppTokenController.new)!.link(
-          () => AppUserController(managedContext),
-        )
-    ..route('note/[:number]').link(AppTokenController.new)!.link(
-          () => AppNoteController(managedContext),
-        )
-    ..route('history').link(AppTokenController.new)!.link(
-          () => AppHistoryController(managedContext),
-        );
+    ..route('token/[:refresh]').link(() => AppAuthController(managedContext))
+    ..route('user').link(AppTokenController.new)!.link(() => AppUserController(managedContext))
+    ..route('note/[:number]').link(AppTokenController.new)!.link(() => AppNoteController(managedContext))
+    ..route('history').link(AppTokenController.new)!.link(() => AppHistoryController(managedContext));
 
   PersistentStore _initDatabase() {
     final config = AppConfiguration.fromFile(
@@ -45,13 +34,7 @@ class AppService extends ApplicationChannel {
     final host = db.host;
     final port = db.port;
     final databaseName = db.databaseName;
-    return PostgreSQLPersistentStore(
-      username,
-      password,
-      host,
-      port,
-      databaseName,
-    );
+    return PostgreSQLPersistentStore(username, password, host, port, databaseName);
   }
 }
 

@@ -13,72 +13,36 @@ class AppAuthController extends ResourceController {
   @Operation.post()
   Future<Response> signIn(@Bind.body() User user) async {
     if (user.password == null || user.userName == null) {
-      return Response.badRequest(
-        body: ModelResponse(
-          message: 'Поля password и username обязательны',
-        ),
-      );
+      return Response.badRequest(body: ModelResponse(message: 'Поля password и username обязательны'));
     }
     try {
       final qFindUser = Query<User>(managedContext)
         ..where((element) => element.userName).equalTo(user.userName)
-        ..returningProperties(
-          (element) => [
-            element.id,
-            element.salt,
-            element.hashPassword,
-          ],
-        );
+        ..returningProperties((element) => [element.id, element.salt, element.hashPassword]);
       final findUser = await qFindUser.fetchOne();
       if (findUser == null) {
-        throw QueryException.input(
-          'Пользователь не найден',
-          [],
-        );
+        throw QueryException.input('Пользователь не найден', []);
       }
-      final requestHashPassword = generatePasswordHash(
-        user.password ?? '',
-        findUser.salt ?? '',
-      );
+      final requestHashPassword = generatePasswordHash(user.password ?? '', findUser.salt ?? '');
       if (requestHashPassword == findUser.hashPassword) {
         _updateTokens(findUser.id ?? -1, managedContext);
-        final newUser =
-            await managedContext.fetchObjectWithID<User>(findUser.id);
-        return Response.ok(
-          ModelResponse(
-            data: newUser!.backing.contents,
-            message: 'Успешная авторизация',
-          ),
-        );
+        final newUser = await managedContext.fetchObjectWithID<User>(findUser.id);
+        return Response.ok(ModelResponse(data: newUser!.backing.contents, message: 'Успешная авторизация'));
       } else {
-        throw QueryException.input(
-          'Неверный пароль',
-          [],
-        );
+        throw QueryException.input('Неверный пароль', []);
       }
     } on QueryException catch (e) {
-      return Response.serverError(
-        body: ModelResponse(
-          message: e.message,
-        ),
-      );
+      return Response.serverError(body: ModelResponse(message: e.message));
     }
   }
 
   @Operation.put()
   Future<Response> signUp(@Bind.body() User user) async {
     if (user.password == null || user.userName == null || user.email == null) {
-      return Response.badRequest(
-        body: ModelResponse(
-          message: 'Поля password, username и email обязательны',
-        ),
-      );
+      return Response.badRequest(body: ModelResponse(message: 'Поля password, username и email обязательны'));
     }
     final salt = generateRandomSalt();
-    final hashPassword = generatePasswordHash(
-      user.password!,
-      salt,
-    );
+    final hashPassword = generatePasswordHash(user.password!, salt);
     try {
       late final int id;
       await managedContext.transaction(
@@ -95,40 +59,24 @@ class AppAuthController extends ResourceController {
       );
       final userData = await managedContext.fetchObjectWithID<User>(id);
       return Response.ok(
-        ModelResponse(
-          data: userData!.backing.contents,
-          message: 'Пользователь успешно зарегистрирован',
-        ),
-      );
+          ModelResponse(data: userData!.backing.contents, message: 'Пользователь успешно зарегистрирован'));
     } on QueryException catch (e) {
-      return Response.serverError(
-        body: ModelResponse(message: e.message),
-      );
+      return Response.serverError(body: ModelResponse(message: e.message));
     }
   }
 
   @Operation.post('refresh')
-  Future<Response> refreshToken(
-      @Bind.path('refresh') String refreshToken) async {
+  Future<Response> refreshToken(@Bind.path('refresh') String refreshToken) async {
     try {
       final id = AppUtils.getIdFromToken(refreshToken);
       final user = await managedContext.fetchObjectWithID<User>(id);
       if (user!.refreshToken != refreshToken) {
-        return Response.unauthorized(
-          body: 'Токен не валидный',
-        );
+        return Response.unauthorized(body: 'Токен не валидный');
       }
       _updateTokens(id, managedContext);
-      return Response.ok(
-        ModelResponse(
-          data: user.backing.contents,
-          message: 'Токен успешно обновлен',
-        ),
-      );
+      return Response.ok(ModelResponse(data: user.backing.contents, message: 'Токен успешно обновлен'));
     } on QueryException catch (e) {
-      return Response.serverError(
-        body: ModelResponse(message: e.message),
-      );
+      return Response.serverError(body: ModelResponse(message: e.message));
     }
   }
 
@@ -143,13 +91,8 @@ class AppAuthController extends ResourceController {
 
   Map<String, String> _getTokens(int id) {
     final key = Platform.environment['SECRET_KEY'] ?? 'SECRET_KEY';
-    final accessClaimSet = JwtClaim(
-      maxAge: const Duration(hours: 1),
-      otherClaims: {'id': id},
-    );
-    final refreshClaimSet = JwtClaim(
-      otherClaims: {'id': id},
-    );
+    final accessClaimSet = JwtClaim(maxAge: const Duration(hours: 1), otherClaims: {'id': id});
+    final refreshClaimSet = JwtClaim(otherClaims: {'id': id});
     final tokens = <String, String>{};
     tokens['access'] = issueJwtHS256(accessClaimSet, key);
     tokens['refresh'] = issueJwtHS256(refreshClaimSet, key);

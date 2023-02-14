@@ -11,35 +11,23 @@ class AppHistoryController extends ResourceController {
   final ManagedContext managedContext;
 
   @Operation.get()
-  Future<Response> getHistory(
-      @Bind.header(HttpHeaders.authorizationHeader) String header) async {
+  Future<Response> getHistory(@Bind.header(HttpHeaders.authorizationHeader) String header) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
-      final historyQuery = Query<History>(managedContext)
-        ..where((history) => history.user!.id).equalTo(currentUserId);
+      final historyQuery = Query<History>(managedContext)..where((history) => history.user!.id).equalTo(currentUserId);
       final histories = await historyQuery.fetch();
       List historiesJson = List.empty(growable: true);
       for (final history in histories) {
-        history.removePropertiesFromBackingMap(
-          ["user", "id"],
-        );
+        history.removePropertiesFromBackingMap(["user", "id"]);
         historiesJson.add(history.backing.contents);
       }
       if (historiesJson.isEmpty) {
-        return AppResponse.ok(
-          message: 'История не найдена',
-        );
+        return AppResponse.ok(message: 'История не найдена');
       }
       historiesJson = historiesJson.reversed.toList();
-      return AppResponse.ok(
-        body: historiesJson,
-        message: "Успешное получение",
-      );
+      return AppResponse.ok(body: historiesJson, message: "Успешное получение");
     } catch (e) {
-      return AppResponse.serverError(
-        e,
-        message: 'Ошибка получения',
-      );
+      return AppResponse.serverError(e, message: 'Ошибка получения');
     }
   }
 }

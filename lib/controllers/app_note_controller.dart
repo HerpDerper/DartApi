@@ -13,17 +13,14 @@ class AppNoteController extends ResourceController {
 
   @Operation.post()
   Future<Response> createNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header,
-      @Bind.body() Note note) async {
+      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.body() Note note) async {
     try {
       late final int noteId;
       final id = AppUtils.getIdFromHeader(header);
-      final notesQuery = Query<Note>(managedContext)
-        ..where((note) => note.user!.id).equalTo(id);
+      final notesQuery = Query<Note>(managedContext)..where((note) => note.user!.id).equalTo(id);
       final notes = await notesQuery.fetch();
       final noteNumber = notes.length;
-      final fUser = Query<User>(managedContext)
-        ..where((user) => user.id).equalTo(id);
+      final fUser = Query<User>(managedContext)..where((user) => user.id).equalTo(id);
       final user = await fUser.fetchOne();
       await managedContext.transaction((transaction) async {
         final qCreateNote = Query<Note>(transaction)
@@ -39,34 +36,17 @@ class AppNoteController extends ResourceController {
         noteId = createdNote.id!;
       });
       final noteData = await managedContext.fetchObjectWithID<Note>(noteId);
-      noteData!.removePropertiesFromBackingMap(
-        [
-          "user",
-          "id",
-          "status",
-        ],
-      );
-      createHistory(
-        id,
-        "Заметка с номером ${noteData.number} добавлена",
-      );
-      return AppResponse.ok(
-        body: noteData.backing.contents,
-        message: 'Успешное добавление',
-      );
+      noteData!.removePropertiesFromBackingMap(["user", "id", "status"]);
+      createHistory(id, "Заметка с номером ${noteData.number} добавлена");
+      return AppResponse.ok(body: noteData.backing.contents, message: 'Успешное добавление');
     } catch (e) {
-      return AppResponse.serverError(
-        e,
-        message: 'Ошибка добавления',
-      );
+      return AppResponse.serverError(e, message: 'Ошибка добавления');
     }
   }
 
   @Operation.put("number")
-  Future<Response> updateNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header,
-      @Bind.path("number") int number,
-      @Bind.body() Note note) async {
+  Future<Response> updateNote(@Bind.header(HttpHeaders.authorizationHeader) String header,
+      @Bind.path("number") int number, @Bind.body() Note note) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
       final noteQuery = Query<Note>(managedContext)
@@ -75,9 +55,7 @@ class AppNoteController extends ResourceController {
         ..where((note) => note.status).notEqualTo("deleted");
       final noteDB = await noteQuery.fetchOne();
       if (noteDB == null) {
-        return AppResponse.ok(
-          message: "Заметка не найдена",
-        );
+        return AppResponse.ok(message: "Заметка не найдена");
       }
       final qUpdateNote = Query<Note>(managedContext)
         ..where((note) => note.id).equalTo(noteDB.id)
@@ -87,26 +65,16 @@ class AppNoteController extends ResourceController {
         ..values.dateTimeEdit = DateTime.now().toString()
         ..values.status = "updated";
       await qUpdateNote.update();
-      createHistory(
-        currentUserId,
-        "Заметка с номером $number обновлена",
-      );
-      return AppResponse.ok(
-        body: note.backing.contents,
-        message: "Успешное обновление",
-      );
+      createHistory(currentUserId, "Заметка с номером $number обновлена");
+      return AppResponse.ok(body: note.backing.contents, message: "Успешное обновление");
     } catch (e) {
-      return AppResponse.serverError(
-        e,
-        message: 'Ошибка получения',
-      );
+      return AppResponse.serverError(e, message: 'Ошибка получения');
     }
   }
 
   @Operation.delete("number")
   Future<Response> deleteNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header,
-      @Bind.path("number") int number) async {
+      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
       final noteQuery = Query<Note>(managedContext)
@@ -121,25 +89,16 @@ class AppNoteController extends ResourceController {
         ..where((note) => note.number).equalTo(number)
         ..values.status = "deleted";
       await qLogicDeleteNote.update();
-      createHistory(
-        currentUserId,
-        "Заметка с номером $number удалена",
-      );
-      return AppResponse.ok(
-        message: 'Успешное удаление',
-      );
+      createHistory(currentUserId, "Заметка с номером $number удалена");
+      return AppResponse.ok(message: 'Успешное удаление');
     } catch (e) {
-      return AppResponse.serverError(
-        e,
-        message: 'Ошибка удаления',
-      );
+      return AppResponse.serverError(e, message: 'Ошибка удаления');
     }
   }
 
   @Operation.get("number")
   Future<Response> getOneNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header,
-      @Bind.path("number") int number,
+      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number,
       {@Bind.query("restore") bool? restore}) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
@@ -153,10 +112,7 @@ class AppNoteController extends ResourceController {
         deletedNoteQuery.values.status = "restored";
         deletedNoteQuery.update();
         message = "Успешное восстановление";
-        createHistory(
-          currentUserId,
-          "Заметка с номером $number восстановлена",
-        );
+        createHistory(currentUserId, "Заметка с номером $number восстановлена");
       }
       final noteQuery = Query<Note>(managedContext)
         ..where((note) => note.number).equalTo(number)
@@ -164,31 +120,20 @@ class AppNoteController extends ResourceController {
         ..where((note) => note.status).notEqualTo("deleted");
       final note = await noteQuery.fetchOne();
       if (note == null) {
-        return AppResponse.ok(
-          message: "Заметка не найдена",
-        );
+        return AppResponse.ok(message: "Заметка не найдена");
       }
-      note.removePropertiesFromBackingMap(
-        [
-          "user",
-          "id",
-        ],
-      );
+      note.removePropertiesFromBackingMap(["user", "id"]);
       return AppResponse.ok(
         body: note.backing.contents,
         message: message,
       );
     } catch (e) {
-      return AppResponse.serverError(
-        e,
-        message: 'Ошибка получения',
-      );
+      return AppResponse.serverError(e, message: 'Ошибка получения');
     }
   }
 
   @Operation.get()
-  Future<Response> getNotes(
-      @Bind.header(HttpHeaders.authorizationHeader) String header,
+  Future<Response> getNotes(@Bind.header(HttpHeaders.authorizationHeader) String header,
       {@Bind.query("search") String? search,
       @Bind.query("limit") int? limit,
       @Bind.query("offset") int? offset,
@@ -201,8 +146,7 @@ class AppNoteController extends ResourceController {
           ..where((note) => note.name).contains(search)
           ..where((note) => note.user!.id).equalTo(id);
       } else {
-        notesQuery = Query<Note>(managedContext)
-          ..where((note) => note.user!.id).equalTo(id);
+        notesQuery = Query<Note>(managedContext)..where((note) => note.user!.id).equalTo(id);
       }
       switch (filter) {
         case "created":
@@ -230,28 +174,15 @@ class AppNoteController extends ResourceController {
       final notes = await notesQuery.fetch();
       List notesJson = List.empty(growable: true);
       for (final note in notes) {
-        note.removePropertiesFromBackingMap(
-          [
-            "user",
-            "id",
-          ],
-        );
+        note.removePropertiesFromBackingMap(["user", "id"]);
         notesJson.add(note.backing.contents);
       }
       if (notesJson.isEmpty) {
-        return AppResponse.ok(
-          message: "Заметки не найдены",
-        );
+        return AppResponse.ok(message: "Заметки не найдены");
       }
-      return AppResponse.ok(
-        message: 'Успешное получение',
-        body: notesJson,
-      );
+      return AppResponse.ok(message: 'Успешное получение', body: notesJson);
     } catch (e) {
-      return AppResponse.serverError(
-        e,
-        message: 'Ошибка получения',
-      );
+      return AppResponse.serverError(e, message: 'Ошибка получения');
     }
   }
 
