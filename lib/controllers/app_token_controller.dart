@@ -11,7 +11,7 @@ class AppTokenController extends Controller {
     try {
       final header = request.raw.headers.value(HttpHeaders.authorizationHeader);
       final token = const AuthorizationBearerParser().parse(header);
-      final jwtClaim = verifyJwtHS256Signature(token ?? "", AppConst.secretKey);
+      final jwtClaim = verifyJwtHS256Signature(token ?? "", AppConst.secretKey, maxAge: const Duration(days: 1));
       jwtClaim.validate();
       return request;
     } on JwtException catch (e) {

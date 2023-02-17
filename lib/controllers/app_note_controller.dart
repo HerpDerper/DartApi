@@ -17,8 +17,8 @@ class AppNoteController extends ResourceController {
     try {
       late final int noteId;
       final id = AppUtils.getIdFromHeader(header);
-      final notesQuery = Query<Note>(managedContext)..where((note) => note.user!.id).equalTo(id);
-      final notes = await notesQuery.fetch();
+      final noteQuery = Query<Note>(managedContext)..where((note) => note.user!.id).equalTo(id);
+      final notes = await noteQuery.fetch();
       final noteNumber = notes.length;
       final fUser = Query<User>(managedContext)..where((user) => user.id).equalTo(id);
       final user = await fUser.fetchOne();
