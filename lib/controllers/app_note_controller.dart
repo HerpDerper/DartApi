@@ -11,7 +11,7 @@ class AppNoteController extends ResourceController {
 
   final ManagedContext managedContext;
 
-  @Operation.post()
+  @Operation.put()
   Future<Response> createNote(
       @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.body() Note note) async {
     try {
@@ -44,7 +44,7 @@ class AppNoteController extends ResourceController {
     }
   }
 
-  @Operation.put("number")
+  @Operation.post("number")
   Future<Response> updateNote(@Bind.header(HttpHeaders.authorizationHeader) String header,
       @Bind.path("number") int number, @Bind.body() Note note) async {
     try {
