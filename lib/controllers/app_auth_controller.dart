@@ -58,8 +58,7 @@ class AppAuthController extends ResourceController {
         },
       );
       final userData = await managedContext.fetchObjectWithID<User>(id);
-      return Response.ok(
-          ModelResponse(data: userData!.backing.contents, message: 'Пользователь успешно зарегистрирован'));
+      return Response.ok(ModelResponse(data: userData!.backing.contents, message: 'Пользователь успешно зарегистрирован'));
     } on QueryException catch (e) {
       return Response.serverError(body: ModelResponse(message: e.message));
     }

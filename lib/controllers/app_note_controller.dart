@@ -12,8 +12,7 @@ class AppNoteController extends ResourceController {
   final ManagedContext managedContext;
 
   @Operation.put()
-  Future<Response> createNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.body() Note note) async {
+  Future<Response> createNote(@Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.body() Note note) async {
     try {
       late final int noteId;
       final id = AppUtils.getIdFromHeader(header);
@@ -45,8 +44,7 @@ class AppNoteController extends ResourceController {
   }
 
   @Operation.post("number")
-  Future<Response> updateNote(@Bind.header(HttpHeaders.authorizationHeader) String header,
-      @Bind.path("number") int number, @Bind.body() Note note) async {
+  Future<Response> updateNote(@Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number, @Bind.body() Note note) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
       final noteQuery = Query<Note>(managedContext)
@@ -73,8 +71,7 @@ class AppNoteController extends ResourceController {
   }
 
   @Operation.delete("number")
-  Future<Response> deleteNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number) async {
+  Future<Response> deleteNote(@Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
       final noteQuery = Query<Note>(managedContext)
@@ -97,8 +94,7 @@ class AppNoteController extends ResourceController {
   }
 
   @Operation.get("number")
-  Future<Response> getOneNote(
-      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number,
+  Future<Response> getOneNote(@Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.path("number") int number,
       {@Bind.query("restore") bool? restore}) async {
     try {
       final currentUserId = AppUtils.getIdFromHeader(header);
@@ -134,10 +130,7 @@ class AppNoteController extends ResourceController {
 
   @Operation.get()
   Future<Response> getNotes(@Bind.header(HttpHeaders.authorizationHeader) String header,
-      {@Bind.query("search") String? search,
-      @Bind.query("limit") int? limit,
-      @Bind.query("offset") int? offset,
-      @Bind.query("filter") String? filter}) async {
+      {@Bind.query("search") String? search, @Bind.query("limit") int? limit, @Bind.query("offset") int? offset, @Bind.query("filter") String? filter}) async {
     try {
       final id = AppUtils.getIdFromHeader(header);
       Query<Note>? notesQuery;

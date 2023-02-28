@@ -10,8 +10,7 @@ class AppUserController extends ResourceController {
   final ManagedContext managedContext;
 
   @Operation.post()
-  Future<Response> updateProfile(
-      @Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.body() User user) async {
+  Future<Response> updateProfile(@Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.body() User user) async {
     try {
       final id = AppUtils.getIdFromHeader(header);
       final fUser = await managedContext.fetchObjectWithID<User>(id);
@@ -29,8 +28,8 @@ class AppUserController extends ResourceController {
   }
 
   @Operation.put()
-  Future<Response> updatePassword(@Bind.header(HttpHeaders.authorizationHeader) String header,
-      @Bind.query("newPassword") String newPassword, @Bind.query("oldPassword") String oldPassword) async {
+  Future<Response> updatePassword(@Bind.header(HttpHeaders.authorizationHeader) String header, @Bind.query("newPassword") String newPassword,
+      @Bind.query("oldPassword") String oldPassword) async {
     try {
       final id = AppUtils.getIdFromHeader(header);
       final qFindUser = Query<User>(managedContext)
