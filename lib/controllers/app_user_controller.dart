@@ -44,8 +44,8 @@ class AppUserController extends ResourceController {
       final qUpdateUser = Query<User>(managedContext)
         ..where((x) => x.id).equalTo(id)
         ..values.hashPassword = newHashPassword;
-      await qUpdateUser.fetchOne();
-      return AppResponse.ok(body: 'Успешное обновление');
+      await qUpdateUser.updateOne();
+      return AppResponse.ok(body: 'Успешное обновление пароля');
     } catch (e) {
       return AppResponse.serverError(e, message: 'Ошибка обновления');
     }
