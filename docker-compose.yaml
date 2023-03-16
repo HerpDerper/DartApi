@@ -11,6 +11,7 @@ services:
     image: postgres:13.4
     restart: always
     environment:
+      - POSTGRES_HOST=localhost
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
       - POSTGRES_DB=postgres
