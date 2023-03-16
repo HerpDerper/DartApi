@@ -3,7 +3,7 @@ version: '3.1'
 services:
   site:
     build: .
-    container_name: site
+    container_name: apiska
     ports: 
       - "8888:8888"
 
